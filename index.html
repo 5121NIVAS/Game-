@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors</title>
+  <link rel="stylesheet" href="./office.css">
+  <style>
+</style>
+</head>
+<body>
+  <div class="scoreboard">
+    <div class="title">
+      ROCK<br>
+      PAPER<br>
+      SCISSORS
+    </div>
+    <div class="scores">
+      <div class="score-box">
+        <div class="label">COMPUTER<br>SCORE</div>
+        <div class="score">0</div>
+      </div>
+      <div class="score-box">
+        <div class="label">YOUR<br>SCORE</div>
+        <div class="score">0</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="container">
+    <button class="choicebutton" data-choice="rock">
+        <div class="choice rock">
+            <img src="./rock (2).svg" alt="rock">
+        </div>
+    </button>
+    <button class="choicebutton" data-choice="paper">
+        <div class="choice paper">
+            <img src="./paper.svg" alt="paper">
+        </div>
+    </button>
+    <button class="choicebutton" data-choice="sis">
+        <div class="choice sis">
+            <img src="./siscor.svg" alt="sis">
+        </div>
+    </button>
+
+
+    <div class="line line1"></div>
+    <div class="line line2"></div>
+    <div class="line line3"></div>
+  </section>
+
+  <button class="close-btn">X</button>
+
+  <div class="rules-container">
+    <h2>Game Rules</h2>
+     <!-- Yellow Boxes -->
+     <div class="yellow-box box1"></div>
+     <div class="yellow-box box2"></div>
+     <div class="yellow-box box3"></div>
+     <div class="yellow-box box4"></div>
+  
+     <ul>
+      <li class="li1"> Rock beats scissors, scissors beat paper, and paper beats rock..</li>
+      <li class="li2">Agree ahead of time whether you’ll count off “rock, paper, scissors, shoot” or just “rock, paper, scissors.”</li>
+      <li class="li3"> rock, paper, scissors to settle minor decisions or simply play to pass the time</li>
+      <li class="li4">If both players lay down the same hand, each player lays down another hand</li>
+ </ul>
+  </div>
+  <button class="Rules"> <span>RULES</span></button>
+</div>
+
+
+<div class="result-screen">
+  <p class="labelyou">YOU PICKED</p>
+  <div id="player-choice" class="choice buttonyoupicked" ></div>
+  <p class="labelpc" id="labelpc">PC PICKED</p>
+  <div id="computer-choice" class="choice buttonpcpicked"></div>
+    <h1 class="statement" id="result-text">YOU WIN</h1>
+    <p class="against"  id="against-pc">AGAINST PC</p>
+  <button class="playagainbtn" id="play-again-button" onclick="playAgain()">PLAY AGAIN</button>
+</div>
+
+<button class="Reset"> <span>Reset</span></button>
+<script>
+
+  const closeBtn = document.querySelector('.close-btn');
+  const rulesBtn = document.querySelector('.Rules');
+  const rulesContainer = document.querySelector('.rules-container');
+  
+  const container = document.querySelector('.container');
+  const resultScreen = document.querySelector('.result-screen');
+  const playerChoiceDiv = document.getElementById('player-choice');
+  const computerChoiceDiv = document.getElementById('computer-choice');
+  const resultText = document.getElementById('result-text');
+  const againstPC = document.getElementById('against-pc');
+  const labelPC = document.getElementById('labelpc');
+  const playAgainButton = document.getElementById('play-again-button');
+  
+  // Initialize scores
+  let userScore = parseInt(localStorage.getItem('userScore')) || 0;
+  let computerScore = parseInt(localStorage.getItem('computerScore')) || 0;
+  
+  const choices = ["rock", "paper", "sis"];
+  const choiceButtons = document.querySelectorAll('.choicebutton');
+  
+  // Update scoreboard
+  function updateScoreboard() {
+    document.querySelector('.scoreboard .scores .score-box:nth-child(1) .score').textContent = computerScore;
+    document.querySelector('.scoreboard .scores .score-box:nth-child(2) .score').textContent = userScore;
+  }
+  
+  // Save scores to localStorage
+  function saveScores() {
+    localStorage.setItem('userScore', userScore);
+    localStorage.setItem('computerScore', computerScore);
+  }
+  
+  closeBtn.addEventListener('click', () => {
+    rulesContainer.style.display = 'none';
+    closeBtn.style.display = 'none';
+  });
+  
+  rulesBtn.addEventListener('click', () => {
+    rulesContainer.style.display = 'block';
+    closeBtn.style.display = 'block';
+  });
+  
+  choiceButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const userChoice = button.getAttribute('data-choice');
+      const computerChoice = choices[Math.floor(Math.random() * 3)];
+  
+      container.style.display = 'none';
+      resultScreen.style.display = 'flex';
+  
+      playerChoiceDiv.innerHTML = getChoiceMarkup(userChoice);
+      computerChoiceDiv.innerHTML = getChoiceMarkup(computerChoice);
+  
+      const outcome = getWinner(userChoice, computerChoice);
+      resultText.textContent = outcome;
+  
+      if (outcome === "TIE UP") {
+        againstPC.style.display = 'none';
+      } else {
+        againstPC.style.display = 'block';
+      }
+  
+      // Update scores based on the outcome with 15 limit
+      if (outcome === "YOU WIN" && userScore < 15) {
+        userScore++;
+      } else if (outcome === "YOU LOSE" && computerScore < 15) {
+        computerScore++;
+      }
+  
+      saveScores();  // Save after updating
+      updateScoreboard();
+  
+      playAgainButton.textContent = (outcome === "TIE UP") ? "REPLAY" : "PLAY AGAIN";
+    });
+  });
+  
+  function getChoiceMarkup(choice) {
+    const colorMap = {
+      rock: 'rgba(0, 116, 182, 1)',
+      paper: 'rgba(255, 169, 67, 1)',
+      sis: 'rgba(189, 0, 255, 1)'
+    };
+    const imgMap = {
+      rock: './rock (2).svg',
+      paper: './paper.svg',
+      sis: './siscor.svg'
+    };
+    return `
+      <div class="choice" style="width: 110px; height: 110px; border-radius: 50%; outline: 16px solid ${colorMap[choice]}; background: white; display: grid; place-items: center;">
+        <img src="${imgMap[choice]}" style="width: 60px;" />
+      </div>
+    `;
+  }
+  
+  function getWinner(user, computer) {
+    if (user === computer) return "TIE UP";
+    if (
+      (user === "rock" && computer === "sis") ||
+      (user === "paper" && computer === "rock") ||
+      (user === "sis" && computer === "paper")
+    ) {
+      return "YOU WIN";
+    } else {
+      return "YOU LOSE";
+    }
+  }
+  
+  function playAgain() {
+    container.style.display = 'block';
+    resultScreen.style.display = 'none';
+  }
+  
+  // Initial setup: update scoreboard based on saved scores
+  updateScoreboard();
+
+    // Add this line with other selectors
+const resetBtn = document.querySelector('.Reset');
+
+// Add this event listener
+resetBtn.addEventListener('click', () => {
+  userScore = 0;
+  computerScore = 0;
+  saveScores();
+  updateScoreboard();
+});
+  </script>
+  
+
+
+</body>
+</html>
